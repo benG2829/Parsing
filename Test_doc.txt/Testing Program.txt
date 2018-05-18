@@ -1,0 +1,722 @@
+Turtle Graphics - Testing Program
+
+The aim of this testing program is to confirm that the following criterion have
+been met:
+
+[1]. Program conforms to parsing requirements as set out in project brief. For
+the purposes of reference this is to create a recursive descent parser.
+[2].  Program conforms to interpreter requirements as set out in the project
+brief.
+[3]. Program is able to undertake testing variables provided in the brief i.e.
+simple statements, nested loops, nested loops with "SET" declaration etc.
+[4]. Program is able to meet more detailed testing requirements created by program
+creator, this will include multiple loops, pattern generation and reports designed
+to break the program (or at least warn the user of any issues).
+[5]. No excessive memory leakage - see ValGrind report in both sections for
+further details.
+[6]. That the formal grammar is appropriately adhered to.
+[7]. Is the program length and quality appropriate for the task at hand.
+
+Introduction:
+
+Throughout the course of this project I have come across numerous problems when
+building the code to adhere to the turtle graphics formal grammar.
+This testing document aims to critically assess my code as a whole,
+whilst also checking that each function serves an appropriate purpose, is
+creating the intended output and its inclusion within the program is therefore
+warranted.
+
+Black Box vs White Box Testing:
+
+There are two predominant testing methods that could be employed when evaluating
+this program - either white or black box testing. Predominantly this test script
+will evaluate how the program works, how functions speak to one another
+where can be improved and what simply has not work - which is white box testing.
+
+Black box testing has been undertaken by several of my peers and I forming
+an anonymous syndicate, where we provide random pieces of code to try and
+break each others programs. This will be mentioned further with the detailed
+write up of the testing harness.
+
+Testing Harness and Unit Testing:
+
+I have chosen to implement a test harness myself, rather than using a program
+such as C Unit or Unity. I feel that by implementing the tests myself, using
+scripted test programs (see sub folder), I can control the test environment
+that the code is placed under, whilst also having a clearer idea of what each
+test is designed to do. An accurate testing harness has the following components
+which I intend to replicate:
+
+- Execute test suites of test cases
+- Generate a test report
+- Automate the testing process.
+
+I have divided my tests up into the following core aspects:
+
+- Functionality - Does it work?
+- 'Break-ability' - Does it fail with a soft warning rather than a huge
+  segmentation fault/ crash.
+- Brief Tests - Those provided on the brief document.
+- Complex Tests - Imaginative functions that the code should handle.
+- Line Usage and Branching - what parts of the code are used and when.
+
+Part 1 - The Parser:
+
+Testing protocol to be undertaken:
+
+Using Gcov and the testing harness outlined above the i will will test a variety
+of test scripts to ensure that all lines in code have been used appropriately to
+create a recursive descent parser. It has involved the following topic areas:
+
+[1]. Initiation of the test script and implementation.
+[2]. Assigning VAR and VARNUM correctly.
+[3]. Moving FD, LT, RT.
+[4]. Correct input of VAR.
+[5]. Polish grammar
+[6]. Using DO Loop Grammar.
+[7]. Negative Numbers.
+[8]. Size of text file inputted.
+[9]. Showing the USER errors
+[10]. Memory leakage.
+
+TEST Script:
+
+TS(1) - Setting up Gcov;
+
+- Initiation of test phase.
+- Using Gcov.
+- Unused variables.
+- Use of the -b (branch execution function)
+- Focus: Black Box testing.
+
+The first test script shows the first iteration of Gcov used in this test
+environment, which did not include the use of the -b library
+(branch functionality).
+
+There were very few lines not used when running the code - mainly stderr
+statements and using the instruction_statement LT, simply because this was not
+used in the source file. Further iterations will check to ensure these variables
+are working correctly, as well as other functions which appear to be
+potentially limited such as the check brace function and polish grammar.
+
+TS(2) - Assigning VAR and VARNUM correctly, checking for appropriate case etc:
+
+- Assigning VAR correctly.
+- Issues with floating point numbers.
+- When is a VAR a VAR or a VARNUM?.
+- Check VARNUM() function usage.
+- Focus: White box testing.
+
+The first issue I encountered was assigning a VAR as both an Alpha char and
+a VARNUM. The current function assigns a VAR (A-Z) to a number array between
+0 and 25 (i.e. A is 0 and Z is 25) and stores its corresponding value.
+Issues presented themselves when scanning a string to ensure that no
+no characters were invalid i.e. not a number, but if they were a VAR (i.e.
+capital alphabet char, to pass them the check VAR function).
+
+I found that running test script 2 (TS2; see parser folder), my code was allowing
+any string that began with a number through the parser, because the program was
+built to check if the first char of the string was a digit. TS2 also highlighted
+the necessary functionality of a capture for strings with both numbers and VAR's
+in - which is not allowed and was captured.
+
+The problem was rectified by using strchr() and casting the decimal point to an
+integer. By then simply incrementing the for loop count past this if found, this
+meant that the string was able to be parsed without consequence. TS2 also
+highlights that the check_VARNUM() function was used in its entirety.
+
+TS(3) - Moving FT, LT, RT:
+
+- Using the base case test script.
+- Limitations with the recursive descent parser.
+- Appropriate error statements.
+
+Due to the limited functionality required for this test, the program only
+actually used 38% of the functions and the initial test was thought to be good
+enough to pass.
+
+However a second and third iteration of new test scripts highlighted that I had
+not included a capture for an incorrectly spelt direction statement
+(either left or right). This issue also caused a segmentation fault, presumably
+as the program continued to search and went into unallocated memory.
+
+To rectify this problem a catch statement was placed at the bottom of the
+find_length/ angle functions, and a new test program was run to check both left
+and right instructions would be captured if they were incorrectly allocated.
+However, the problem did not resolve itself, as the parser simply continued to
+cycle through and never found memory.
+
+The resolution was actually achieved by adding a catch function at the bottom of
+the instruction statement function. If an input was incorrectly spelt/ entered
+it would be thrown out by the program as a stderr. This also meant that the error
+statement placed in bottom of the find_angle/ find length functions could be
+removed - as an invalid variable would no longer be able to enter the function.
+
+I was also required to ensure that a closing brace would be allowed to return to
+the top, otherwise the stderr would catch the closing brace. This was also
+included in the new file.
+
+TS (4) - Correct assignment of VAR:
+
+- Limitations of my current approach.
+- Assigning longer VAR's and Lower case chars.
+- Use of Check_var Function.
+- ASCII code use - random char selection.
+
+Albeit similar to test from TS2, checking for the correct assignment of VAR is
+slightly more challenging. For this test script, I sought to make sure that I was
+checking for VAR in several places - when used a VARNUM (i.e. as a degree or
+length statement) and when used to initialize a do loop (using just the
+heck_VAR() function).
+
+The first iteration of the test correctly rejected the VAR used [CAKE] as it was
+too large (strlen). Similarly assigning [C1] as a VAR was not allowed, as it did
+not conform to the protocol (see TS4.1).
+
+The second iteration would just use the check_var function (as I sought to check
+the initialization of VAR in the DO LOOP), and would again be used by assigning
+[C1] and [CAKE], whilst also using lower case chars [c] and any other ascii codes
+not assigned, in this instance the operators used from the formal grammar brief
+[+ / - *].
+
+Initially, the code did not fail with the lower case characters, whilst the
+operators were caught by the VARNUM() function, as they did not conform to the
+correct syntax. The lower case characters were however caught by the program
+moving  onto the next string and were caught when looking for a VARNUM.
+
+++Needs to be rectified++;
+
+TS (5) - Polish grammar
+
+- Correct application of functionality.
+- Does grammar conform i.e. allowable constraints.
+- Use of operands.
+- Correct conventions.
+
+I aimed to create the polish grammar functionality so that any VARNUM/ VAR
+selected within a "SET" would be simply pushed onto a stack and popped off when
+required. For the parser, this is not important as a stack is not present, but
+the functionality to accept the correct operators and VAR/VARNUm is important.
+
+The function has been created to compare strings between the set initiator (":=")
+and the closing ";" for the set. As such, the function should cycle through the
+strings in this section and return any erroneous input in the CNT == max, i.e.
+a string has not been found. The CNT is between 42 and 47 (the ACSII values of
+[* + - /]) and if CNT reaches max, then a polish operator has not been found.
+Gcov report B highlights that this was captured with the use of the correct
+polish grammar error statement (line 313). The function then checks to see
+whether the input is an allowable string, which if they are will return without
+error.
+
+Attempts to then fail the function subsequently worked by using non-conforming
+grammar, or invalid sequences - such as (ts5.3) - where no 'SET Grammar' was
+used. The function simply cycled straight through to the closing semi-colon
+and issued an error.
+
+However, when initializing a set and leaving off ":=", the polish functionality
+simply parsed straight through without error (ts5.4). This was caused by the
+assign var function not checking the formal grammar framework. A check and
+error statement was subsequently put in place to find any formatting issues.
+
+TS (6) - Do Loop Grammar, SET Grammar & Nested Loops:
+
+- Does it cycle into the correct places?
+- Use of Var, InstructList etc.
+- Nested Loops
+
+The Do Function is simply an offshoot from the Instruction statement and will
+either be entered following a check for Length/ Angle or straight from the
+outset. Initial testing from Gcov identified that the correct protocol was
+followed as the loop was correctly initiated and branched following one loop
+(TS6.1). As expected, branches were not taken to SET Functions and no error
+reports were generated.
+
+This was then tested with SET functionality, where many more branches were then
+executed (82% of lines executed and 93% of branches taken, with 62% taken at
+least once). The test script ts6.2 was designed to have both a nested loop,
+SET Grammar, polish and the use of VAR's as VARNUM'S. The script passed, although
+with a slightly lower line usage than anticipated at 82%.
+
+A third test script was then applied (ts6.3) - more directions, eight times
+nested loop etc. This slightly increased the line usage count to c. 85%, with
+96.3% of branches used - but consideration must be paid to the lack of lines
+being used. Upon further inspection of the Gcov(d) test results, line usage
+count includes those lines which contain a brace, exit statements (which if
+input file is correct should not be hit) and spaces between functions. Therefore
+it would be prudent to assume that usage is actually reflected by a smaller
+number than perhaps is the reality.
+
+When trying to break the do function, such as leaving a closing brace off after
+the larger VARNUM after "FROM", the code did fail, as the check brace function
+ratified (ts6.5). Similarly, when leaving a number out from the do statement
+(ts6.6) the VARNUM function found that a number was missing by finding either a
+brace or a "TO". When replacing the DO with alternative instructions such as a
+VAR, VARNUM or INSTRUCTLIST, the code failed - but not immediately. For example
+an INSTRUCTLIST call would go through the function and eventually cut out when
+it reached "FROM" - as A VAR/ VARNUM would be accepted. After much thought, I
+believe that adapting the code to counter this may be an unfruitful task - as
+the effort required to amend the code to essentially achieve the same result is
+perhaps not warranted.
+
+I also created a function (skip_string()) to move the parser onto the next word
+specifically surrounding do loop grammar, see below:
+
+TS (7) - Negative Numbers:
+
+- Can negative numbers be accepted? Varnum doesn't say not.
+- Floating point - how to deal with them.
+
+The program has been built to accept at this stage positive numbers only, not
+signed negative integers. This presents a large problem as the formal grammar
+does not stipulate whether they aren't allowed, however I have made a design
+decision NOT to include negative numbers for the following reasons:
+
+- When using a negative number for an angle a minus number would simply be going
+the other way - i.e. RT -45, is simply LT (or logic would dictate).
+
+- Using a negative number for FD would move the Turtle backwards. This is a
+potential extension, but is not part of the grammar. To reverse the direction, a
+RT or LT instruction of 180 would move the turtle in the opposite way anyway.
+
+- Polish with negative. Assigning a negative value to polish expressions, such
+as -4 5 + which would be 1, is no different to 5 - 4.
+
+Therefore I feel that the necessary logic to include this is not worth the
+required input. As a result, the program has been created to ensure that this
+does not happen and the check VARNUM function will simply return any VAR/ VARNUM
+which is attempting to be allocated a negative number as an error (see ts7.1).
+
+Further iterations of the test however identified that when a negative number
+was used with polish expressions, it would be allowed through, but subsequent
+formal grammar selections would cause an error. Albeit, the error has been caught,
+whats interesting is that -1 has not been flagged as an issue, presumably because
+the program searches for the operator, finds it and looks no further.
+
+As a result I have hard coded a conditional statement below the operators
+where:
+
+if(strlen(p) < 2){
+NEXT_STRING:
+return;
+}
+
+This has subsequently meant that any negative numbers (which would have a
+strlen of > 1), are now caught and pushed out with an error statement. Gcov (b)
+highlights the capture of a negative number on line 306 and ts7.2 shows the code
+used to try and break the program, which has now been resolved.
+
+
+TS (8) - Size of File Entered:
+
+- How large can an instruction be?
+- How can my program cope with it?
+- Ways to solve issues with memory etc.
+
+At present my code has been built in a non-dynamic manner i.e. static arrays, no
+ability to re-size/ readjust to a large input from the user. Having created a
+piece of code 500 lines long, with my fixed array set to 1000, the code continues
+to work fine. However, I feel that this does not offer much flexibility to the
+program (i.e. if the input file was greater than 1000 lines of entry) and is a
+waste of memory.
+
+As a result, I have made the design decision to alter the array to become a
+dynamically allocated array which will double in size when it gets to 80% capacity.
+This has since meant that the array has been altered to a **array, whilst extra
+functionality has been added, such as an enlarge array function.
+
+To check that this was working i employed the same steps as i have previously,
+applying several different complexities to the file i chose. Ts8.1 contained a
+file with c. 300 lines of code in, simply:
+
+FD 100
+RT 100
+LT 100
+FD 100
+
+This parsed fine. Ts8.2 then was applied, which was the same code, with Do Loops
+added (with SET Grammar), to increase the complexity applied to the parser.
+
+FD 100
+RT 100
+LT 100
+FD 100
+DO A FROM 1 TO 8 {
+SET D := A / * + - 1 ;
+FD D
+RT 80
+FD 100
+RT 100
+LT 100
+FD 100
+
+This once again went through satisfactorily (see Gcov files is TS 8 for more info).
+One of the interesting applications of the the Gcov analysis is that even the
+more complex grammar application only used c. 85% of the lines. Once again this will
+be reflected upon at a later point.
+
+TS (9) - Showing the user errors:
+
+- How easy can the user check for user error?
+- What systems/ catch all has been put in place?
+
+Throughout this process I have found that debugging in general, let alone to
+satisfy the testing parameters I have set out, has been challenging. Stderrr and
+print statements have helped, but i feel that the user must get as much help
+from the program as possible. As a result I have made a design choice to include
+a print out of the error, the problematic string and its place in the code.
+My first iterations of the parser were simply:
+
+fprintf(stderr, "Expecting a VARNUM");
+exit(2);
+
+As much as this serves a purpose, i felt that it lacked the usefulness of a
+more complex program. As a result I amended all of the stderr statements to
+include the following parameters:
+
+- Type of Error - i.e. which section of the formal grammar.
+- String that caused the error
+- PIC - Place In code.
+
+fprintf(stderr, "Expecting a VARNUM, String parsed [%s], PIC [%d]\n",
+tg->wd[tg->now], tg->now);
+exit(2);
+
+I feel that this now directs the user immediately to any issue at hand. Ts9.1
+- ts9.7 confirmed that these would fail in a user friendly manner and line usage
+provided by Gcov appears to be as expected considering the error generation.
+
+TS(10) - Valgrind Analysis;
+
+- Check for substantial memory leaks.
+- Sure up to make a more efficient program.
+
+The final check for the parser is the use of Valgrind to check whether there is
+any substantial memory leakage (see Memcheck file). My initial run was
+considerably disappointing, 68 allocs, 3 frees and 7776 bytes allocated.
+After the program had completed, there were c. 2000 bytes lost, 1024 definitely
+and 1080 indirectly. Obviously any memory that can be efficiently saved will
+increase program run time and and actually helped me to ensure that my code
+was relatively free of bugs.
+
+There were three sections where memory was definitely lost in substantial amounts:
+
+- When I allocate memory initially (allocate_space).
+- When arrays are reallocated when they are enlarged (enlarge_array).
+- When the file is initially read (read_file()).
+
+As a result i took the following steps to ensure that memory leaks were
+limited:
+
+- Free space when array is enlarged (as the older array is now no longer needed).
+- Ensure that i make the array as small as possible to begin with. This ensures
+that a small amount of space is used initially.
+- Consolidate functions so that memory is not transferred between small functions.
+- Please see read file, which has been substantially reduced in size, with only
+two offshoot functions.
+
+Part 2 - The Interpreter:
+
+Testing protocol to be undertaken:
+
+As many of the functions that will be used by the interpreter were tested in the
+parser test, I will not undertake the same analysis to the same degree on these
+areas. Instead I will focus on the additional functions and come back to any
+other functions should they require revisiting. I can also make an assumption to
+a satisfactory level that as the interpreter does not differ from the parser,
+that line usage would be similar, albeit dependent upon the branches taken at
+times.
+
+Due to its incompatibility with SDL i will not be using Gcov or Valgrind to assess
+the effectiveness of the implementation of SDL. I think that it is suitable to
+assume that if the output matches the requirements i.e. a 100 pixel octagon and
+the input draws the shape without any runtime issue. This will be evaluated by
+the use of screen prints and will be included in a separate file.
+
+Finally, the interpreter has been designed and implemented to ensure that if an
+instruction is found to be invalid it will exit during printing.
+
+Analysis on the interpreter will cover the following areas:
+
+[1] Instruction Statement
+[2] Do Grammar & Nested Loops
+[3] SET Grammar & Polish Grammar Implementation
+[4] SDL Output and Line Generation
+[5] Test Harness
+
+[1] Instruction statement:
+
+The instruction_statement function is a directory of all of the potential
+avenues that code could be directed. Its implementation is considerably simple
+in design, does the string put into it match one of the conditions, if so
+action it. The issues that I encountered during implementation was in fact how
+to ensure that the returned strings to this function were suitable for further
+computation. For this reason I aimed to keep this function as simple as
+possible, limiting error and ensuring that the program maintained a smooth flow.
+
+If a string does not correspond to an instruction it is directed to
+the instruct list check (all code within a recursive descent parser gradually
+falls through), where if a string does not match it will result in an stderr.
+See ts.1 - ts.4 and screen grabs (below) showing capture of misspelt input code:
+
+Bens-MBP:PART2 BenGiles$ ./do test1.txt
+Incorrect Instruction [F] PIC [8]?
+Bens-MBP:PART2 BenGiles$ ./do test1.txt
+Incorrect Instruction [R] PIC [10]?
+Bens-MBP:PART2 BenGiles$ ./do test1.txt
+Incorrect Instruction [DP] PIC [1]?
+Bens-MBP:PART2 BenGiles$ ./do test1.txt
+Incorrect Instruction [T] PIC [10]?
+
+PIC as mentioned before shows the place in the code which has caused the
+failure and exit. In the instances above FD, RT, LT and DO were spelt
+incorrectly. This clearly indicates that the program ceases should any string
+be inputted incorrectly.
+
+One of the things that I am most proud of is that functions have been designed
+and implemented to make sure that error capture is constrained to that function
+or the movement into another. Very few, if any, functions take in a variable and
+do not establish whether or not they should be undertaking that particular
+variable. The instruction statement is one of those.
+
+[2] Do Grammar & Nested Loops:
+
+- Complexities of nested loops
+- Stack implementation
+
+Do Grammar and Nested Loops have been the most complex part of the interpreters
+implementation and SDL Generation. I have chosen to implement a design based on
+a dynamic stack and recalling the do loop at the start of its previous iteration.
+The stack also keeps a current record of the iteration that the loop is currently
+on and when it reaches max falls through to the check_stack function.
+
+The main problem I encountered with nested loops was the function not returning
+from the lowest loop. The below is an example of the foundation loop that I
+created within my testing (see Test 2, ts2). The three tier loop uses basic
+polygon angle maths (360 degrees/ number of sides) and formed the benchmark
+for my ability to make changes to the program and retain user efficiency. A
+Screen shot of the loop can be found in the file also.
+
+TEST2: Ts1:
+
+{
+DO C FROM 1 TO 12 {
+FD 150
+RT 30
+DO A FROM 1 TO 8 {
+FD 100
+RT 45
+DO B FROM 1 TO 4 {
+FD 50
+RT 90
+}
+}
+}
+}
+
+I found that the nested loops not exiting the lower loops were caused by an
+imbalance between pushing onto and popping off the stack. The first iterations
+through the DO loop only print the first side of the loop, so as a result in a
+three tier loop (above) you would push down three times before you pop off, causing a
+significant imbalance. For the above line of code I implemented a count in both
+the push and pop functions to show when items were pushed onto and off the
+stack, which as you can see represents four pieces of information going on for
+each loop (max, count, VAR, and PIC [place in code]), only after twelve pushes
+does the first pop take place.
+
+Bens-MBP:PART2 BenGiles$ gcc interpreter_main.c interpreter_sdl.c -o
+do -Wall -O2 -Wall -Wextra -Wfloat-equal -pedantic -ansi -lm
+$(pkg-config --libs sdl2 --cflags)
+
+[FIRST LOOP]
+Push onto stack -> Count [1]
+Push onto stack -> Count [2]
+Push onto stack -> Count [3]
+Push onto stack -> Count [4]
+[SECOND LOOP]
+Push onto stack -> Count [5]
+Push onto stack -> Count [6]
+Push onto stack -> Count [7]
+Push onto stack -> Count [8]
+Push onto stack -> Count [9]
+[THIRD LOOP]
+Push onto stack -> Count [10]
+Push onto stack -> Count [11]
+Push onto stack -> Count [12]
+[THIRD LOOP [REPEATED]]
+Pop off stack -> Count [1]
+Pop off stack -> Count [2]
+Pop off stack -> Count [3]
+Pop off stack -> Count [4]
+
+I have included test scripts 3 - 5 which show testing with different shapes from
+12 sided down to 4 sided. I found that when initializing a loop moving right
+then completing a nested loop moving left worked fine, this confirmed to me
+that my implementation was sufficient to move on.
+
+Notably point:
+
+I found that my program was not able to cope with nested loops of more than 6 and
+however much i adjusted parameters and conditions I was unable to resolve the
+issue.
+
+[3] - SET Grammar & Polish Grammar:
+
+I chose to implement set grammar in a similar manner to the INSTRUCTLIST, mainly
+because it followed on sequentially from an opening brace and therefore made
+sense for implementation within Instruction statement. Then following a similar
+protocol to the Do_grammar function instructions are moved through one by one.
+
+The function set var selects the current iteration, whilst checking that the VAR
+selected is a valid A-Z char for the set, "tg->set_var" is then updated as the
+current variable being used. This was checked by simply identifying that the
+function simply returned the correct VAR, undertaken by several print statements.
+
+The set var function then moves through to assign var function. This function
+cycles through the code between the polish initiation of ":=" until it reaches
+the closing ";". Tests were successful in the parser (see PART1/Test5/gcov(b))
+to show that line by line the SET grammar execution was effective at moving
+through the set, storing variables and returning correctly.
+
+However, I found that moving onto undertaking polish grammar instructions was
+very difficult, namely because of how to store and when to undertake the
+deployment of the arithmetic. Initially, it was simple to ascertain that variables
+were not falling through and being caught by error statements in the polish
+grammar function, which simply determines whether the VAR/ VARNUM or operator
+is sufficient. See error statements below:
+
+Bens-MBP:PART2 BenGiles$ ./do tst
+Incorrect POLISH grammar [&]
+Bens-MBP:PART2 BenGiles$ ./do tst
+Incorrect POLISH grammar [:]
+
+I found however that if a VAR was inputted in lower case it would pass through,
+because set var does not look for un-eligible variables. As a result the following
+statement was implemented at the top of SET_VAR which acted as a capture for
+these variables:
+
+if(!isupper(tg->wd[tg->now][0])){
+    fprintf(stderr, "Incorrect SET grammar [%s]\n", tg->wd[tg->now]);
+    exit(2);
+  }
+
+Data capture returned the following:
+
+Bens-MBP:PART2 BenGiles$ ./do tst
+Incorrect SET grammar [a]
+Bens-MBP:PART2 BenGiles$ ./do tst
+Incorrect SET grammar [!]
+Bens-MBP:PART2 BenGiles$ ./do tst
+Incorrect SET grammar [b]
+Bens-MBP:PART2 BenGiles$
+
+This step solidified the polish grammar function as SET_VAR is also called when
+establishing that whether the set grammar is able to be accepted.
+
+Finally, polish grammar only assigns an operator to an array, the remainder of
+set variables are pushed for operation onto a polish stack. The result is that the
+array is wound back to the start once its contents have been allocated and then
+the instruction is passed to the convert set function. However, the array position
+is not indicative of the operations to be performed, the reality being that the
+operator is now at the back relative to the number which is next to be popped off.
+
+I found it very difficult to implement a system that was flexible to this, and as
+a result assertions were difficult to overcome. The reality is that you need to
+have pushed down two VAR / VARNUMS before you pop them off and perform an operation,
+with the result then popped back down.
+
+Assertion failed: (s->tp != NULL), function pop, file interpreter_main.c, line 687.
+Abort trap: 6
+
+Initially i implemented a polish count (below) which only called the function
+when two VARS had been pushed onto the stack. However, further work is needed
+to establish how best to solve this.
+
+if(polish % 2 == 0){
+    convert_set(tg, s);
+    return;
+  }
+
+Finally, I made the design decision that any VAR used as a SET VAR which was
+not initialized would be parsed and interpreted as normal (see example test script)
+TEST5/ts4, where the VAR used was not initialised and consequently returned 0
+when a degree.
+
+[4] SDL Output and Line Generation:
+
+SDL has been used in this program from a wrapper (neillsdl2.c and accompanying
+header file). SDL is initialized d just before the parser begins and lines are drawn
+as data is parsed throughout. This is a design feature to ensure that this
+part of the program interprets rather simply prints.
+
+There are three main functions, albeit small, which form the foundation of the
+interpreter and because of their size I have identified them below:
+
+copy() : Simply takes the coordinates from one iteration to the next and
+transfers them between x and x1, y and y1. This results in the previous location
+being updated as the new location (see screen shot TEST5/screenshot - removal of
+copy). The intended parse was in fact the nested loop with set to draw the
+outward spiral with octagons (see with copy screen shot).
+
+turtle_t copy(turtle_t *tg)
+{
+   tg->x1 = tg->x;
+   tg->y1 = tg->y;
+   return *tg;
+}
+
+convert_to_radian() : This function converts an angle taken in decimal/ float
+form and converts it to a radian. Well used in maths, 3.14 radians is equivalent
+to 180 degrees, and so its importance in determining the next coordinates for
+the program is essential. The function below is imperative to accurately
+calculating the next location of a line.
+
+double convert_to_radian(int angle)
+{
+   double radians;
+   radians = angle / (180 / M_PI);
+   return radians;
+}
+
+You will see in (TEST5/removal_of_radian) that the removal of this function
+results in inconsistent pattern generation. Please do be aware that the inclusion
+of SDL output must have to reflect my laptop being particularly poor with
+rendering SDL graphics.
+
+co_ordinate() : The co_ordinate function uses sin and cos to establish the
+next co ordinates for the interpreter - IT IS THE MOST IMPORTANT five lines
+within the entire program. The function computes both sin and cos, applying
+the previously found radian with the length to produce the radian angle.
+
+turtle_t co_ordinate(turtle_t *tg, double angle)
+{
+   tg->x1 += cos(angle)*tg->length;
+   tg->y1 += sin(angle)*tg->length;
+   return *tg;
+}
+
+You will see its removal (TEST5 - Removal_of_co_ordinate) highlights how simply
+no line is rendered on the SDL screen. The nested do loop was once again chosen
+to represent the text to be parsed (TS5 nested do loop). Its inclusion is therefore
+paramount to producing an accurately drawn SDL image.
+
+[5] Test Harness:
+
+The entirety of testing this program has been based white box testing, being aware
+of what is happening within the program and output being generated. I have
+undertaken the majority of the testing harness/ unit test in this manner so far.
+However, since the test code is nearly ready to go live, i believe that it is
+important to generate an automated test environment to check multiple test scripts
+to ensure the validity of this report.
+
+As a result TEST5 contains a test_harness document with automatically runs through
+c. 20 test files, some which are designed to fail, others which should pass. This
+part of my blackbox testing makes me feel confident in the codes ability to stand
+up to multiple formal grammar challenges if faced with them.  
+
++_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+
+
+FINAL CONCLUSION
+
+The testing process has covered most scenarios from input, to output, to design
+and layout. I believe i have taken the necessary steps to ensure that the program
+runs smoothly with little run-time issue.

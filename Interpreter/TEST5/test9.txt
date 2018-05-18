@@ -1,0 +1,8 @@
+{
+DO A FROM 1 TO 8 {
+SET B := B * 5 ;
+FD B
+RT 45
+}
+}
+}
